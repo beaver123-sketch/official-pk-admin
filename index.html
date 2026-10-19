@@ -45,11 +45,29 @@
 .notify-form-select{width:100%;height:43px;border:1px solid #cfd8e5;border-radius:5px;background:#fff;color:#5a6570;font-size:15px;padding:0 14px}
 .notify-form-select:focus{outline:2px solid #d9ebff;border-color:#409eff}
 .btn-test{border:1px solid #409eff!important;color:#409eff;background:white}.btn-test:hover{background:#edf6ff}.btn-test:disabled{border-color:#c6cdd7!important;color:#a8afb9;background:#fff}
-.test-send-overlay{z-index:1100}.test-send-dialog{background:#fff;width:520px;max-width:calc(100vw - 35px);border-radius:6px;box-shadow:0 18px 48px #0003;padding:25px 29px}
-.test-send-dialog h3{font-weight:600;font-size:18px;margin:0 0 20px}.test-form-row{display:flex;align-items:center;gap:12px;margin:0 0 17px}.test-form-row label{flex:0 0 96px;font-size:14px;color:#606975}.test-form-row input,.test-form-row select{min-width:0;flex:1;font-size:14px;height:38px;border-radius:4px;border:1px solid #d3dce7;padding:0 11px}
-.test-key{background:#f7f9fc;border:1px solid #e7edf5;border-radius:4px;padding:12px 14px;margin-bottom:18px;line-height:1.7;overflow-wrap:anywhere;color:#647085}
-.test-key b{font-weight:600;color:#394354}.test-send-dialog .confirm-btns .btn{height:36px;padding:0 17px}.test-error{color:#e45757;font-size:12px;line-height:1.6;margin:8px 0}
+.test-send-overlay{z-index:1100}
+.test-send-dialog{background:#fff;width:480px;max-width:calc(100vw - 32px);border-radius:7px;box-shadow:0 18px 48px #0003;overflow:hidden}
+.test-send-dialog h3{font-weight:600;font-size:17px;margin:0;padding:22px 26px 18px;border-bottom:1px solid #e9edf3;color:#303741}
+.test-send-dialog .test-form-row{display:flex;align-items:center;gap:14px;margin:26px 26px 22px}
+.test-send-dialog .test-form-row label{flex:0 0 104px;font-size:14px;color:#606975;white-space:nowrap}
+.test-send-dialog .test-form-row input{min-width:0;flex:1;font-size:14px;height:40px;border-radius:5px;border:1px solid #cfd8e5;padding:0 12px;outline:none}
+.test-send-dialog .test-form-row input:focus{border-color:#409eff;box-shadow:0 0 0 2px #e6f1ff}
+.test-send-dialog .confirm-btns{display:flex;justify-content:flex-end;gap:10px;margin:0;padding:15px 26px;border-top:1px solid #e9edf3}
+.test-send-dialog .confirm-btns .btn{height:36px;padding:0 17px;font-size:13px}
+.test-send-dialog .test-error{color:#e45757;font-size:12px;line-height:1.6;margin:-8px 26px 18px}
+@media(max-width:520px){.test-send-dialog .test-form-row{display:block}.test-send-dialog .test-form-row label{display:block;margin-bottom:9px}.test-send-dialog .test-form-row input{width:100%}}
 .dialog .dialog-body{scrollbar-gutter:stable}
+/* 代理通知表单：统一标签宽度，防止“首次推送时间”换行及字段错位 */
+.notify-panel{margin-top:14px;padding-top:22px}
+.notify-heading{margin-left:0;margin-bottom:20px;font-size:15px}
+.notify-panel .form-row{display:grid;grid-template-columns:114px minmax(0,1fr);column-gap:16px;row-gap:0;margin-bottom:16px;align-items:center}
+.notify-panel .form-row>label{width:auto;text-align:right;white-space:nowrap;font-size:14px;line-height:1.5}
+.notify-panel .notify-extra .form-row{margin-bottom:16px}
+.notify-panel .notify-switch-wrap,.notify-panel .notify-interval-inline{min-width:0}
+.notify-panel .modal-field,.notify-panel .notify-form-select{height:42px;min-width:0;font-size:14px}
+.notify-panel .notify-help{margin:-7px 0 15px 130px;line-height:1.5;font-size:12px;color:#98a1ac}
+@media(max-width:820px){.notify-panel .form-row{grid-template-columns:104px minmax(0,1fr);column-gap:10px}.notify-panel .notify-help{margin-left:114px}}
+@media(max-width:520px){.notify-panel .form-row{grid-template-columns:95px minmax(0,1fr);column-gap:8px}.notify-panel .notify-help{margin-left:103px}.notify-panel .form-row>label{font-size:12px}}
 @media(max-width:820px){.notify-heading{margin-left:81px}.notify-help{margin-left:81px}.notify-hint{font-size:11px}.notify-switch-wrap{flex-wrap:wrap}}
 </style>
 </head>
@@ -167,9 +185,7 @@ function showTestSendDialog(key,pkId){
   const dialog=document.createElement('div');dialog.className='overlay test-send-overlay';dialog.id='testSendOverlay';
   dialog.innerHTML=`<section class="test-send-dialog" role="dialog" aria-modal="true" aria-label="测试发送代理消息">
     <h3>测试发送代理消息</h3>
-    <div class="test-key"><b>消息多语言 Key：</b>${escapeHtml(key)}<br>测试发送不计入正式推送频次，不改变活动通知状态。</div>
     <div class="test-form-row"><label for="testReceiver">测试接收人 ID <span class="required">*</span></label><input id="testReceiver" autocomplete="off" maxlength="64" placeholder="请输入测试接收人 ID" /></div>
-    <div class="test-form-row"><label for="testLang">测试语言</label><select id="testLang"><option value="auto">按接收人语言</option><option value="zh-CN">简体中文</option><option value="en">English</option><option value="id">Bahasa Indonesia</option><option value="vi">Tiếng Việt</option><option value="ar">العربية</option></select></div>
     <div id="testSendError" class="test-error" hidden></div>
     <div class="confirm-btns"><button id="testCancel" class="btn">取消</button><button id="testConfirm" class="btn btn-primary">确认测试发送</button></div>
     </section>`;
@@ -179,13 +195,13 @@ function showTestSendDialog(key,pkId){
   dialog.addEventListener('click',e=>{if(e.target===dialog)close()});
   $('#testReceiver',dialog).focus();
   $('#testConfirm',dialog).onclick=async()=>{
-    const receiverId=$('#testReceiver',dialog).value.trim(),locale=$('#testLang',dialog).value;
+    const receiverId=$('#testReceiver',dialog).value.trim();
     const error=$('#testSendError',dialog),button=$('#testConfirm',dialog);
     if(!receiverId){error.hidden=false;error.textContent='请输入测试接收人 ID';return}
     if(!/^[\w.-]{1,64}$/.test(receiverId)){error.hidden=false;error.textContent='接收人 ID 只能包含数字、英文字母、下划线、点和短横线';return}
     button.disabled=true;button.textContent='发送中…';error.hidden=true;
     try{
-      const response=await fetch('/api/pk-notification/test-send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pkId,notifyKey:key,recipientId:receiverId,locale}),cache:'no-store'});
+      const response=await fetch('/api/pk-notification/test-send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pkId,notifyKey:key,recipientId:receiverId,locale:'auto'}),cache:'no-store'});
       const raw=await response.text();let result=null;try{result=JSON.parse(raw)}catch{}
       if(!response.ok||!result||result.success!==true||!result.messageId)throw new Error(response.status===404||response.status===405||!result?'测试发送接口暂不可用，请联系开发人员接入消息服务':result?.message||'消息推送失败，请检查接收人 ID 和消息配置');
       close();toast('测试消息已发送（消息 ID：'+result.messageId+'）');
@@ -207,11 +223,10 @@ function showForm(mode,row){
       <div class="form-row"><label for="fieldMode"><span class="required">*</span>pk模式</label><div class="modal-select-wrap"><select id="fieldMode" class="modal-field modal-select"><option value="">请选择</option>${['单人','多人'].map(x=>`<option ${row?.mode===x?'selected':''}>${x}</option>`).join('')}</select></div></div>
       <div class="form-row"><label><span class="required">*</span>活动时间</label><div class="date-control modal-date">${dateIcon}<input aria-label="活动开始日期" type="text" id="fieldStart" placeholder="开始日期" value="${escapeHtml(row?.start||'')}"/><span class="date-to">至</span><input aria-label="活动结束日期" id="fieldEnd" type="text" placeholder="结束日期" value="${escapeHtml(row?.end||'')}"/></div></div>
       <div class="notify-panel">
-        <h3 class="notify-heading">代理消息通知 <small>可配置推送频次</small></h3>
+        <h3 class="notify-heading">代理消息通知</h3>
         <div class="form-row notify-switch-row"><label for="notifyEnabled">代理通知</label><div class="notify-switch-wrap"><label class="notify-switch-label" title="${locked?'消息已发送，不能再次安排推送':'开启或关闭当前活动的代理通知'}"><input id="notifyEnabled" type="checkbox" role="switch" aria-label="代理消息通知开关" ${enabled?'checked':''} ${locked?'disabled':''}/><span class="notify-switch-track"></span></label><span class="notify-switch-word" id="notifySwitchText">${enabled?'开启':'关闭'}</span><span class="notify-hint" id="notifySwitchHint">${locked?'已推送，通知配置已锁定':enabled?'请完善多语言 Key 和推送时间':'默认关闭，不发送代理提醒'}</span></div></div>
         <div id="notifyExtra" class="notify-extra" ${enabled?'':'hidden'}>
           <div class="form-row"><label for="notifyKey"><span class="required">*</span>多语言 Key</label><input id="notifyKey" type="text" class="modal-field" placeholder="请输入多语言 Key，如 pk_agent_reminder" autocomplete="off" maxlength="200" value="${escapeHtml(row?.notifyKey||'')}" ${locked?'disabled':''}/></div>
-          <p class="notify-help">仅填写一个多语言 Key，对应一段通知文字，无需区分标题和正文。</p>
           <div class="form-row"><label for="notifyFrequency"><span class="required">*</span>推送频次</label><select id="notifyFrequency" class="notify-form-select" ${locked?'disabled':''}>
             <option value="once" ${frequency(row)==='once'?'selected':''}>仅推送一次</option>
             <option value="daily" ${frequency(row)==='daily'?'selected':''}>每日一次</option>
@@ -219,7 +234,7 @@ function showForm(mode,row){
           </select></div>
           <div class="form-row" id="notifyIntervalRow" ${frequency(row)==='custom'?'':'hidden'}><label for="notifyIntervalHours"><span class="required">*</span>推送间隔</label><div class="notify-interval-inline"><input id="notifyIntervalHours" type="number" min="6" max="720" step="1" class="modal-field" placeholder="6～720" value="${escapeHtml(row?.notifyIntervalHours||6)}" ${locked?'disabled':''}/><span class="interval-unit">小时（最少 6 小时）</span></div></div>
           <div class="form-row"><label for="notifyAt"><span class="required">*</span>首次推送时间</label><input id="notifyAt" type="datetime-local" class="modal-field notify-date-input" aria-label="代理提醒首次推送时间（北京时间）" value="${escapeHtml(datetime)}" step="60" ${locked?'disabled':''}/></div>
-          <p class="notify-help">北京时间（UTC+8），精确到分钟；重复推送持续到活动结束时间。</p>
+          <p class="notify-help">北京时间（UTC+8），重复推送截至活动结束时间。</p>
         </div>
       </div>
       <div id="formError" class="form-error" hidden></div>
