@@ -38,9 +38,8 @@
 .notify-extra{padding-top:3px}.notify-extra .form-row{margin-bottom:17px}
 .notify-date-input{font-family:inherit;color:#4f5d71;cursor:pointer;min-width:0}.notify-date-input:disabled,.modal-field:disabled{background:#f6f7f9;color:#9299a7;cursor:not-allowed}
 .notify-help{margin:-8px 0 18px 105px;color:#949da9;font-size:12px;line-height:1.6}
-.notify-preview-note{font-size:12px;line-height:1.6;color:#949ca7;background:#f8f9fb;border:1px solid #eff1f5;border-radius:4px;padding:8px 11px;margin:13px 0 0 105px}
 .dialog .dialog-body{scrollbar-gutter:stable}
-@media(max-width:820px){.notify-heading{margin-left:81px}.notify-help,.notify-preview-note{margin-left:81px}.notify-hint{font-size:11px}.notify-switch-wrap{flex-wrap:wrap}}
+@media(max-width:820px){.notify-heading{margin-left:81px}.notify-help{margin-left:81px}.notify-hint{font-size:11px}.notify-switch-wrap{flex-wrap:wrap}}
 </style>
 </head>
 <body>
@@ -92,7 +91,7 @@ const storageKey='official-pk-admin-v1';const baseRows=[
 {id:101,name:'官方PK第18期',type:'跨国',start:'2026-08-12 00:00',end:'2026-08-15 23:59',mode:'双人'},
 {id:100,name:'东南亚区域主播PK',type:'区域',start:'2026-08-05 00:00',end:'2026-08-08 23:59',mode:'单人'},
 {id:99,name:'官方PK第17期',type:'跨国',start:'2026-07-26 00:00',end:'2026-07-29 23:59',mode:'单人'}];
-// 前四条为截图可见示例，其余作为可查询、分页的演示数据。
+// 预设初始列表数据，支持筛选和分页。
 const generated=Array.from({length:89},(_,i)=>{let id=98-i,m=Math.max(1,7-Math.floor(i/9)),day=1+(i%25);return{id,name:i%4===0?'跨国主播官方PK第'+id+'期':i%3===0?'中东区底薪主播 官方PK':'区域主播PK第'+id+'期',type:i%4===0?'跨国':'区域',start:`2026-${String(m).padStart(2,'0')}-${String(day).padStart(2,'0')} 00:00`,end:`2026-${String(m).padStart(2,'0')}-${String(Math.min(28,day+2)).padStart(2,'0')} 23:59`,mode:i%7===0?'双人':'单人'}});
 let rows;try{let data=JSON.parse(localStorage.getItem(storageKey));rows=Array.isArray(data)?data:[...baseRows,...generated]}catch{rows=[...baseRows,...generated]}
 const save=()=>{try{localStorage.setItem(storageKey,JSON.stringify(rows))}catch{}};
@@ -126,7 +125,7 @@ function attachDatePickers(scope=document){$$('.date-control input[type="text"]'
 attachDatePickers();
 function readFilters(){let fields={id:$('#searchId').value.trim(),name:$('#searchName').value.trim(),type:$('#searchType').value,mode:$('#searchMode').value,status:$('#searchStatus').value,notice:$('#searchNotice').value,start:$('#searchStart').value.replace('T',' '),end:$('#searchEnd').value.replace('T',' ')};if(fields.start&&fields.end&&fields.start>fields.end){toast('开始日期不能晚于结束日期',true);return}activeFilters=fields;currentPage=1;render()}
 $('#searchBtn').addEventListener('click',readFilters);$('#resetBtn').addEventListener('click',()=>{$$('#searchId,#searchName,#searchType,#searchMode,#searchStatus,#searchNotice,#searchStart,#searchEnd').forEach(el=>{el.value='';if(el.id.startsWith('search')&&['searchStart','searchEnd'].includes(el.id))el.type='text'});activeFilters={};currentPage=1;render()});$$('#searchId,#searchName').forEach(el=>el.addEventListener('keydown',e=>{if(e.key==='Enter')readFilters()}));$('#refreshData').addEventListener('click',()=>{render();toast('数据已刷新')});$('#refreshTab').addEventListener('click',()=>{render();toast('刷新成功')});$('#densityBtn').addEventListener('click',()=>{dense=!dense;render()});$('#toggleSidebar').addEventListener('click',()=>$('#app').classList.toggle('sidebar-shrink'));
-$('#pkChevron').closest('.nav-item').addEventListener('click',()=>{let child=$('#pkChildren');child.hidden=!child.hidden;$('#pkChevron').classList.toggle('open',!child.hidden)});$$('[data-unavailable],.nav-item:not([data-collapse]):not([data-nav])').forEach(el=>el.addEventListener('click',()=>toast('当前仅还原「官方PK」模块',true)));$$('[data-nav]').forEach(el=>el.addEventListener('click',()=>toast('当前仅还原「官方PK」模块',true)));
+$('#pkChevron').closest('.nav-item').addEventListener('click',()=>{let child=$('#pkChildren');child.hidden=!child.hidden;$('#pkChevron').classList.toggle('open',!child.hidden)});$$('[data-unavailable],.nav-item:not([data-collapse]):not([data-nav])').forEach(el=>el.addEventListener('click',()=>toast('该模块暂不可用',true)));$$('[data-nav]').forEach(el=>el.addEventListener('click',()=>toast('该模块暂不可用',true)));
 $('#sortId').addEventListener('click',()=>changeSort('id'));$$('[data-sort]').forEach(el=>el.addEventListener('click',()=>changeSort(el.dataset.sort)));function changeSort(key){sorting.dir=sorting.key===key?-sorting.dir:-1;sorting.key=key;currentPage=1;render()}
 $('#tableBody').addEventListener('click',e=>{const btn=e.target.closest('[data-action]');if(!btn)return;let row=rows.find(r=>r.id===Number(btn.dataset.id));if(!row)return;if(btn.dataset.action==='edit')showForm('edit',row);else if(btn.dataset.action==='delete')showDelete(row);else showGroups(row)});
 $('#pagination').addEventListener('click',e=>{let btn=e.target.closest('[data-page]');if(!btn)return;currentPage=Number(btn.dataset.page);render()});$('#pagination').addEventListener('change',e=>{if(e.target.id==='pageSize'){pageSize=Number(e.target.value);currentPage=1;render()}else if(e.target.id==='jumpPage'){currentPage=Math.max(1,Math.min(Math.ceil(filtered().length/pageSize),Number(e.target.value)||1));render()}});
@@ -146,14 +145,13 @@ function showForm(mode,row){
       <div class="form-row"><label><span class="required">*</span>活动时间</label><div class="date-control modal-date">${dateIcon}<input aria-label="活动开始日期" type="text" id="fieldStart" placeholder="开始日期" value="${escapeHtml(row?.start||'')}"/><span class="date-to">至</span><input aria-label="活动结束日期" id="fieldEnd" type="text" placeholder="结束日期" value="${escapeHtml(row?.end||'')}"/></div></div>
       <div class="notify-panel">
         <h3 class="notify-heading">代理消息通知 <small>独立配置 · 每场 PK 仅推送一次</small></h3>
-        <div class="form-row notify-switch-row"><label for="notifyEnabled">代理通知</label><div class="notify-switch-wrap"><label class="notify-switch-label" title="${locked?'消息已发送，不能再次安排推送':'开启或关闭当前活动的代理通知'}"><input id="notifyEnabled" type="checkbox" role="switch" aria-label="代理消息通知开关" ${enabled?'checked':''} ${locked?'disabled':''}/><span class="notify-switch-track"></span></label><span class="notify-switch-word" id="notifySwitchText">${enabled?'开启':'关闭'}</span><span class="notify-hint" id="notifySwitchHint">${locked?'已推送，通知配置已锁定':enabled?'到达指定时间后由消息系统发送':'默认关闭，不发送代理提醒'}</span></div></div>
+        <div class="form-row notify-switch-row"><label for="notifyEnabled">代理通知</label><div class="notify-switch-wrap"><label class="notify-switch-label" title="${locked?'消息已发送，不能再次安排推送':'开启或关闭当前活动的代理通知'}"><input id="notifyEnabled" type="checkbox" role="switch" aria-label="代理消息通知开关" ${enabled?'checked':''} ${locked?'disabled':''}/><span class="notify-switch-track"></span></label><span class="notify-switch-word" id="notifySwitchText">${enabled?'开启':'关闭'}</span><span class="notify-hint" id="notifySwitchHint">${locked?'已推送，通知配置已锁定':enabled?'请完善多语言 Key 和推送时间':'默认关闭，不发送代理提醒'}</span></div></div>
         <div id="notifyExtra" class="notify-extra" ${enabled?'':'hidden'}>
           <div class="form-row"><label for="notifyKey"><span class="required">*</span>多语言 Key</label><input id="notifyKey" type="text" class="modal-field" placeholder="请输入多语言 Key，如 pk_agent_reminder" autocomplete="off" maxlength="200" value="${escapeHtml(row?.notifyKey||'')}" ${locked?'disabled':''}/></div>
           <p class="notify-help">仅填写一个多语言 Key，对应一段通知文字，无需区分标题和正文。</p>
           <div class="form-row"><label for="notifyAt"><span class="required">*</span>推送时间</label><input id="notifyAt" type="datetime-local" class="modal-field notify-date-input" aria-label="代理提醒推送时间（北京时间）" value="${escapeHtml(datetime)}" step="60" ${locked?'disabled':''}/></div>
           <p class="notify-help">北京时间（UTC+8），精确到分钟；时间必须晚于当前时间且不晚于活动结束时间。</p>
         </div>
-        <div class="notify-preview-note">当前为交互原型：此处保存推送配置与状态，不会真正发送消息。实际定时发送和失败重试需接入现有服务端消息系统。</div>
       </div>
       <div id="formError" class="form-error" hidden></div>
     </form>
