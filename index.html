@@ -35,6 +35,11 @@
 .notify-switch-label input:focus-visible+.notify-switch-track{outline:2px solid #81bcfa;outline-offset:2px}
 .notify-switch-word{font-size:13px;color:#606266}
 .dialog .dialog-body{scrollbar-gutter:stable}
+/* 精简通知配置后，表单高度随内容自适应，避免底部大面积空白 */
+#modalOverlay > .dialog:not(.group-dialog){height:auto;min-height:0;max-height:calc(100vh - 54px)}
+#modalOverlay > .dialog:not(.group-dialog) .dialog-header{height:74px}
+#modalOverlay > .dialog:not(.group-dialog) .dialog-body{flex:0 1 auto;overflow:auto;padding-top:24px;padding-bottom:14px}
+#modalOverlay > .dialog:not(.group-dialog) .dialog-footer{height:70px}
 @media(max-width:820px){.notify-heading{margin-left:81px}.notify-panel .form-row{grid-template-columns:72px minmax(0,1fr);gap:9px}}
 </style>
 </head>
